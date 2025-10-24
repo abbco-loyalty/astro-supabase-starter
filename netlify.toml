@@ -2,5 +2,63 @@
   publish = "dist"
   command = "npm run build"
 
+[functions]
+  directory = "netlify/functions"
+
 [template]
   required-extensions = ["supabase"]
+
+[[redirects]]
+  from = "/api/auth/login"
+  to = "/.netlify/functions/auth-login"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/signup"
+  to = "/.netlify/functions/auth-signup"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/logout"
+  to = "/.netlify/functions/auth-logout"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/change-password"
+  to = "/.netlify/functions/auth-change-password"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/delete-account"
+  to = "/.netlify/functions/auth-delete-account"
+  status = 200
+
+[[redirects]]
+  from = "/api/orders/submit"
+  to = "/.netlify/functions/orders-submit"
+  status = 200
+
+[[redirects]]
+  from = "/api/messages/send"
+  to = "/.netlify/functions/messages-send"
+  status = 200
+
+[[redirects]]
+  from = "/api/rewards/claim"
+  to = "/.netlify/functions/rewards-claim"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/orders/verify"
+  to = "/.netlify/functions/admin-orders-verify"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/orders/reject"
+  to = "/.netlify/functions/admin-orders-reject"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/rewards/fulfill"
+  to = "/.netlify/functions/admin-rewards-fulfill"
+  status = 200

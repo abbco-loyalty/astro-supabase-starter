@@ -1,9 +1,27 @@
 @import 'tailwindcss';
 @plugin "@tailwindcss/typography";
 
+@theme {
+  --color-abbco-gold: #D4AF37;
+  --color-abbco-cream: #FAF3E0;
+  --color-abbco-charcoal: #333333;
+  --font-family-display: 'Inter', system-ui, sans-serif;
+}
+
 @layer base {
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-display: swap;
+    src: url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  }
+  
+  body {
+    @apply font-[Inter] bg-abbco-cream text-abbco-charcoal;
+  }
+  
   a {
-    @apply hover:underline hover:underline-offset-2 hover:decoration-green-500;
+    @apply hover:underline hover:underline-offset-2 hover:decoration-abbco-gold;
   }
   td {
     @apply pt-4 pb-6;
@@ -12,6 +30,6 @@
     @apply py-4;
   }
   img {
-    @apply border rounded-sm border-neutral-500;
+    @apply border rounded-sm border-abbco-gold/20;
   }
 }

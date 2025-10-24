@@ -1,0 +1,55 @@
+---
+import "../../src/styles/globals.css";
+
+interface Props {
+  title: string;
+  user?: any;
+}
+
+const { title, user } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} - ABBCo Loyalty</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="min-h-screen bg-abbco-cream text-abbco-charcoal font-[Inter]">
+    <nav class="bg-abbco-charcoal text-abbco-cream shadow-lg">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center">
+            <a href="/dashboard" class="text-2xl font-bold text-abbco-gold">ABBCo Rewards</a>
+          </div>
+          {user && (
+            <div class="flex items-center space-x-6">
+              <a href="/dashboard" class="hover:text-abbco-gold transition">Dashboard</a>
+              <a href="/submit-order" class="hover:text-abbco-gold transition">Submit Order</a>
+              <a href="/messages" class="hover:text-abbco-gold transition">Messages</a>
+              <a href="/claim-reward" class="hover:text-abbco-gold transition">Claim Reward</a>
+              <a href="/settings" class="hover:text-abbco-gold transition">Settings</a>
+              <form action="/api/auth/logout" method="POST" class="inline">
+                <button type="submit" class="hover:text-abbco-gold transition">Logout</button>
+              </form>
+            </div>
+          )}
+        </div>
+      </div>
+    </nav>
+    
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <slot />
+    </main>
+    
+    <footer class="mt-auto bg-abbco-charcoal text-abbco-cream py-6">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p>&copy; 2025 ABBCo. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>

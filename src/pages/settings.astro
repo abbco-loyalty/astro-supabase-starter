@@ -1,0 +1,130 @@
+---
+import AuthLayout from "../components/AuthLayout.astro";
+import { getUser } from "../utils/auth";
+
+const user = await getUser(Astro.cookies);
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+
+let success = '';
+let error = '';
+const url = new URL(Astro.request.url);
+success = url.searchParams.get('success') || '';
+error = url.searchParams.get('error') || '';
+---
+
+<AuthLayout title="Settings" user={user}>
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-8 border-2 border-abbco-gold/20">
+      <h1 class="text-3xl font-bold text-abbco-gold mb-6">Account Settings</h1>
+      
+      {success && (
+        <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+          {success}
+        </div>
+      )}
+      
+      {error && (
+        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      <div class="space-y-8">
+        <div>
+          <h2 class="text-xl font-semibold mb-4">Profile Information</h2>
+          <div class="bg-abbco-cream/30 rounded-lg p-4 border border-abbco-gold/20">
+            <p class="text-sm text-abbco-charcoal/70 mb-1">Email</p>
+            <p class="font-semibold">{user.email}</p>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold mb-4 text-abbco-charcoal">Change Password</h2>
+          <form action="/api/auth/change-password" method="POST" class="space-y-4">
+            <div>
+              <label for="new_password" class="block text-sm font-medium mb-2">
+                New Password
+              </label>
+              <input
+                type="password"
+                id="new_password"
+                name="new_password"
+                required
+                minlength="6"
+                class="w-full px-4 py-3 border border-abbco-charcoal/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-abbco-gold"
+              />
+            </div>
+            <button
+              type="submit"
+              class="bg-abbco-gold text-white font-semibold px-6 py-2 rounded-lg hover:bg-abbco-gold/90 transition"
+            >
+              Update Password
+            </button>
+          </form>
+        </div>
+
+        <div class="border-t-2 border-red-200 pt-8">
+          <h2 class="text-xl font-semibold mb-4 text-red-600">Danger Zone</h2>
+          
+          <div class="bg-red-50 border-2 border-red-300 rounded-lg p-6">
+            <h3 class="font-semibold text-red-800 mb-2">Delete Account</h3>
+            <p class="text-sm text-red-700 mb-4">
+              This action is permanent and cannot be undone. All your data including orders, messages, and rewards will be permanently deleted.
+            </p>
+            
+            <button
+              onclick="document.getElementById('deleteModal').classList.remove('hidden')"
+              class="bg-red-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-red-700 transition"
+            >
+              Delete My Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full border-2 border-red-500">
+      <h2 class="text-2xl font-bold text-red-600 mb-4">Confirm Account Deletion</h2>
+      <p class="text-abbco-charcoal mb-6">
+        Are you absolutely sure you want to delete your account? This action cannot be undone.
+      </p>
+      
+      <form action="/api/auth/delete-account" method="POST" class="space-y-4">
+        <div>
+          <label for="confirm_email" class="block text-sm font-medium mb-2">
+            Type your email to confirm: <strong>{user.email}</strong>
+          </label>
+          <input
+            type="email"
+            id="confirm_email"
+            name="confirm_email"
+            required
+            placeholder={user.email}
+            class="w-full px-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+        </div>
+        
+        <div class="flex gap-4">
+          <button
+            type="submit"
+            class="flex-1 bg-red-600 text-white font-semibold py-2 rounded-lg hover:bg-red-700 transition"
+          >
+            Delete Account
+          </button>
+          <button
+            type="button"
+            onclick="document.getElementById('deleteModal').classList.add('hidden')"
+            class="flex-1 bg-abbco-charcoal/10 text-abbco-charcoal font-semibold py-2 rounded-lg hover:bg-abbco-charcoal/20 transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</AuthLayout>
