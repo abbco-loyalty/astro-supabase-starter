@@ -39,6 +39,87 @@ export type Database = {
         };
         Relationships: [];
       };
+      orders: {
+        Row: {
+          id: string;
+          user_id: string;
+          order_number: string;
+          source: 'amazon' | 'shopify';
+          order_date: string;
+          receipt_url: string | null;
+          status: 'pending' | 'verified' | 'rejected';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          order_number: string;
+          source: 'amazon' | 'shopify';
+          order_date: string;
+          receipt_url?: string | null;
+          status?: 'pending' | 'verified' | 'rejected';
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          order_number?: string;
+          source?: 'amazon' | 'shopify';
+          order_date?: string;
+          receipt_url?: string | null;
+          status?: 'pending' | 'verified' | 'rejected';
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      messages: {
+        Row: {
+          id: string;
+          user_id: string;
+          from_role: 'user' | 'admin';
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          from_role: 'user' | 'admin';
+          body: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          from_role?: 'user' | 'admin';
+          body?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      rewards: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: 'unclaimed' | 'claimed' | 'fulfilled';
+          claim_address: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          status?: 'unclaimed' | 'claimed' | 'fulfilled';
+          claim_address?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          status?: 'unclaimed' | 'claimed' | 'fulfilled';
+          claim_address?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;

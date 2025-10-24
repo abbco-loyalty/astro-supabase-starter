@@ -1,16 +1,102 @@
-# Astro Supabase Starter
+# ABBCo Loyalty Rewards Program
 
-![Astro Supabase Starter Preview](astro-supabase-starter-preview.png)
+A customer loyalty rewards web application built with Astro, Supabase, and Netlify.
 
-**View demo:** [https://astro-supabase-starter.netlify.app/](https://astro-supabase-starter.netlify.app/)
+## Features
 
-The Astro Supabase starter demonstrates how to integrate **Supabase** into an Astro project deployed on Netlify.
+- **User Authentication**: Sign up and log in with email/password via Supabase Auth
+- **Order Submission**: Submit Amazon or Shopify order numbers for verification
+- **Progress Tracking**: Visual progress bar showing verified orders (5 needed for reward)
+- **Messaging**: Contact ABBCo support directly through the app
+- **Reward Claiming**: Claim free products once 5 verified orders are achieved
+- **Account Management**: Change password and delete account (GDPR compliant)
+- **Admin Dashboard**: Staff can verify/reject orders and manage rewards
 
-## Deploying to Netlify
+## Tech Stack
 
-If you click "Deploy to Netlify" button, it will create a new repo for you that looks exactly like this one, and sets that repo up immediately for deployment on Netlify.
+- **Frontend**: Astro with Tailwind CSS
+- **Database & Auth**: Supabase
+- **Hosting**: Netlify (with Netlify Functions)
+- **Styling**: Tailwind CSS with custom ABBCo brand colors
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/netlify-templates/astro-supabase-starter&fullConfiguration=true)
+## Setup Instructions
+
+### 1. Supabase Setup
+
+1. Create a new Supabase project at https://supabase.com
+2. Run the migration script in your Supabase SQL Editor:
+   - Copy the contents of `supabase/migrations/20250101000000_init-loyalty.sql`
+   - Execute it in the Supabase SQL Editor
+3. Get your Supabase credentials:
+   - Go to Project Settings > API
+   - Copy the `URL` (Project URL)
+   - Copy the `anon/public` key
+   - Copy the `service_role` key (for admin functions)
+
+### 2. Environment Variables
+
+Set the following environment variables in Netlify:
+
+```
+SUPABASE_DATABASE_URL=your_supabase_project_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_KEY=your_supabase_service_role_key
+ADMIN_EMAILS=admin@abbco.com,another-admin@abbco.com
+```
+
+### 3. Deploy to Netlify
+
+1. Connect your repository to Netlify
+2. Set the environment variables in Netlify Dashboard
+3. Deploy!
+
+## Database Schema
+
+### Orders Table
+- `id`: UUID (primary key)
+- `user_id`: UUID (references auth.users)
+- `order_number`: Text
+- `source`: 'amazon' | 'shopify'
+- `order_date`: Date
+- `receipt_url`: Text (optional)
+- `status`: 'pending' | 'verified' | 'rejected'
+- `created_at`: Timestamp
+
+### Messages Table
+- `id`: UUID (primary key)
+- `user_id`: UUID (references auth.users)
+- `from_role`: 'user' | 'admin'
+- `body`: Text
+- `created_at`: Timestamp
+
+### Rewards Table
+- `id`: UUID (primary key)
+- `user_id`: UUID (references auth.users)
+- `status`: 'unclaimed' | 'claimed' | 'fulfilled'
+- `claim_address`: Text (shipping address)
+- `created_at`: Timestamp
+
+## Pages
+
+1. **/** - Redirects to login or dashboard
+2. **/login** - Sign up / Login page
+3. **/dashboard** - User dashboard with progress tracking
+4. **/submit-order** - Submit new orders
+5. **/messages** - Message support
+6. **/claim-reward** - Claim free product (unlocked at 5 verified orders)
+7. **/settings** - Account settings and delete account
+8. **/admin** - Admin panel for managing orders and rewards
+
+## Admin Access
+
+To grant admin access, add the user's email to the `ADMIN_EMAILS` environment variable (comma-separated list).
+
+## Brand Colors
+
+- **Gold**: #D4AF37
+- **Cream**: #FAF3E0
+- **Charcoal**: #333333
+- **Font**: Inter
 
 ## Astro Commands
 
@@ -22,53 +108,42 @@ All commands are run from the root of the project, from a terminal:
 | `npm run dev`             | Starts local dev server at `localhost:4321`      |
 | `npm run build`           | Build your production site to `./dist/`          |
 | `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## Developing Locally
-
-| Prerequisites                                                                |
-| :--------------------------------------------------------------------------- |
-| [Node.js](https://nodejs.org/) v18.14+                                       |
-| (optional) [nvm](https://github.com/nvm-sh/nvm) for Node version management  |
-| [Netlify account](https://netlify.com/)                                      |
-| [Netlify CLI](https://docs.netlify.com/cli/get-started/).                    |
-| [Supabase account](https://supabase.com/)                                    |
-
-### Set up the database
-
-To use this template, you’ll need to set up and seed a new Supabase database.
-
-1. Create a new Supabase project.
-2. Run the SQL commands found in the `supabase/migrations` directory in the Supabase UI.
-3. To seed the database with data, you can import the contents of the `supabase/seed.csv` file in the Supabase UI.
-
-ℹ️ _Note: This template was created to be used with the Supabase extension for Netlify. If you don’t wish to use the Netlify Supabase extension, you will need to set the `SUPABASE_DATABASE_URL` and `SUPABASE_ANON_KEY` environment variables in the `.env` file._
-
-### Install and run locally
+## Local Development
 
 1. Clone this repository, then run `npm install` in its root directory.
 
-2. For the starter to have full functionality locally, please ensure you have an up-to-date version of Netlify CLI. Run:
+2. Install Netlify CLI:
 
-```
+```bash
 npm install netlify-cli@latest -g
 ```
 
-3. Link your local repository to the deployed Netlify site. This will ensure you're using the same runtime version for both local development and your deployed site.
+3. Link your local repository to the deployed Netlify site:
 
-```
+```bash
 netlify link
 ```
 
-4. Then, run the Astro.js development server via Netlify CLI:
+4. Run the development server via Netlify CLI:
 
-```
-netlify dev --target-port 4321
+```bash
+netlify dev
 ```
 
 If your browser doesn't navigate to the site automatically, visit [localhost:8888](http://localhost:8888).
 
+## Security
+
+- All routes are protected with authentication
+- Row-level security (RLS) policies ensure users can only access their own data
+- Admin functions require service role key
+- GDPR-compliant account deletion
+
 ## Support
 
 If you get stuck along the way, get help in our [support forums](https://answers.netlify.com/).
+
+## License
+
+All rights reserved © ABBCo

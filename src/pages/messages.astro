@@ -1,0 +1,102 @@
+---
+import AuthLayout from "../components/AuthLayout.astro";
+import { getUser } from "../utils/auth";
+import { supabase } from "../utils/database";
+
+const user = await getUser(Astro.cookies);
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+
+let messages: any[] = [];
+
+if (supabase) {
+  const { data: messagesData } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: true });
+  
+  messages = messagesData || [];
+}
+
+let success = '';
+let error = '';
+const url = new URL(Astro.request.url);
+success = url.searchParams.get('success') || '';
+error = url.searchParams.get('error') || '';
+---
+
+<AuthLayout title="Messages" user={user}>
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg border-2 border-abbco-gold/20 overflow-hidden">
+      <div class="bg-abbco-charcoal text-white p-6">
+        <h1 class="text-3xl font-bold">Messages</h1>
+        <p class="text-white/80 mt-1">Chat with ABBCo support</p>
+      </div>
+
+      {success && (
+        <div class="mx-6 mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+          {success}
+        </div>
+      )}
+      
+      {error && (
+        <div class="mx-6 mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      <div class="p-6 min-h-[400px] max-h-[500px] overflow-y-auto space-y-4">
+        {messages.length === 0 ? (
+          <div class="text-center py-12 text-abbco-charcoal/60">
+            <p>No messages yet. Send a message to ABBCo support below!</p>
+          </div>
+        ) : (
+          messages.map((message) => (
+            <div class={`flex ${message.from_role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div class={`max-w-[70%] rounded-lg p-4 ${
+                message.from_role === 'user' 
+                  ? 'bg-abbco-gold text-white' 
+                  : 'bg-abbco-charcoal/5 text-abbco-charcoal'
+              }`}>
+                <div class="text-xs opacity-75 mb-1">
+                  {message.from_role === 'user' ? 'You' : 'ABBCo Support'}
+                </div>
+                <div class="whitespace-pre-wrap break-words">{message.body}</div>
+                <div class="text-xs opacity-75 mt-2">
+                  {new Date(message.created_at).toLocaleString()}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div class="border-t-2 border-abbco-gold/20 p-6 bg-abbco-cream/30">
+        <form action="/api/messages/send" method="POST" class="space-y-4">
+          <div>
+            <label for="body" class="block text-sm font-semibold mb-2">
+              Send a Message
+            </label>
+            <textarea
+              id="body"
+              name="body"
+              required
+              rows="4"
+              placeholder="Type your message here..."
+              class="w-full px-4 py-3 border border-abbco-charcoal/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-abbco-gold resize-none"
+            ></textarea>
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-abbco-gold text-white font-semibold py-3 rounded-lg hover:bg-abbco-gold/90 transition"
+          >
+            Send Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</AuthLayout>

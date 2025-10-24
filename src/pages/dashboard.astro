@@ -1,0 +1,148 @@
+---
+import AuthLayout from "../components/AuthLayout.astro";
+import { getUser } from "../utils/auth";
+import { supabase } from "../utils/database";
+
+const user = await getUser(Astro.cookies);
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+
+let orders: any[] = [];
+let verifiedCount = 0;
+let reward = null;
+
+if (supabase) {
+  const { data: ordersData } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  
+  orders = ordersData || [];
+  verifiedCount = orders.filter(o => o.status === 'verified').length;
+
+  const { data: rewardData } = await supabase
+    .from('rewards')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
+  
+  reward = rewardData;
+}
+
+const progress = Math.min((verifiedCount / 5) * 100, 100);
+---
+
+<AuthLayout title="Dashboard" user={user}>
+  <div class="space-y-8">
+    <div class="bg-white rounded-lg shadow-lg p-8 border-2 border-abbco-gold/20">
+      <h1 class="text-3xl font-bold text-abbco-gold mb-6">Welcome Back!</h1>
+      
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-xl font-semibold">Your Progress</h2>
+          <span class="text-2xl font-bold text-abbco-gold">{verifiedCount} / 5</span>
+        </div>
+        <div class="w-full bg-abbco-charcoal/10 rounded-full h-6 overflow-hidden">
+          <div 
+            class="bg-abbco-gold h-full rounded-full transition-all duration-500 flex items-center justify-center text-white text-sm font-semibold"
+            style={`width: ${progress}%`}
+          >
+            {progress > 15 && `${Math.round(progress)}%`}
+          </div>
+        </div>
+        <p class="mt-2 text-abbco-charcoal/70">
+          {verifiedCount >= 5 
+            ? "Congratulations! You're eligible to claim your reward!" 
+            : `${5 - verifiedCount} more verified ${5 - verifiedCount === 1 ? 'order' : 'orders'} to unlock your free product!`
+          }
+        </p>
+      </div>
+
+      {verifiedCount >= 5 && !reward && (
+        <a 
+          href="/claim-reward" 
+          class="inline-block bg-abbco-gold text-white font-semibold px-6 py-3 rounded-lg hover:bg-abbco-gold/90 transition"
+        >
+          Claim Your Reward Now!
+        </a>
+      )}
+
+      {reward && (
+        <div class="bg-abbco-gold/10 border border-abbco-gold/30 rounded-lg p-4">
+          <h3 class="font-semibold text-abbco-gold mb-2">Reward Status</h3>
+          <p class="capitalize">Status: <span class="font-semibold">{reward.status}</span></p>
+          {reward.status === 'fulfilled' && (
+            <p class="text-green-600 mt-2">✓ Your reward has been shipped!</p>
+          )}
+        </div>
+      )}
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-8 border-2 border-abbco-gold/20">
+      <h2 class="text-2xl font-bold mb-4">Recent Orders</h2>
+      
+      {orders.length === 0 ? (
+        <div class="text-center py-8">
+          <p class="text-abbco-charcoal/70 mb-4">You haven't submitted any orders yet.</p>
+          <a 
+            href="/submit-order" 
+            class="inline-block bg-abbco-charcoal text-white font-semibold px-6 py-2 rounded-lg hover:bg-abbco-charcoal/90 transition"
+          >
+            Submit Your First Order
+          </a>
+        </div>
+      ) : (
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead>
+              <tr class="border-b-2 border-abbco-charcoal/10">
+                <th class="text-left py-3">Order Number</th>
+                <th class="text-left py-3">Source</th>
+                <th class="text-left py-3">Date</th>
+                <th class="text-left py-3">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.slice(0, 10).map((order) => (
+                <tr class="border-b border-abbco-charcoal/5">
+                  <td class="py-3 font-mono text-sm">{order.order_number}</td>
+                  <td class="py-3 capitalize">{order.source}</td>
+                  <td class="py-3">{new Date(order.order_date).toLocaleDateString()}</td>
+                  <td class="py-3">
+                    <span class={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                      order.status === 'verified' ? 'bg-green-100 text-green-800' :
+                      order.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <a href="/submit-order" class="bg-abbco-gold text-white rounded-lg p-6 hover:bg-abbco-gold/90 transition shadow-lg">
+        <h3 class="text-xl font-semibold mb-2">Submit Order</h3>
+        <p class="text-white/90">Add a new purchase</p>
+      </a>
+      
+      <a href="/messages" class="bg-abbco-charcoal text-white rounded-lg p-6 hover:bg-abbco-charcoal/90 transition shadow-lg">
+        <h3 class="text-xl font-semibold mb-2">Messages</h3>
+        <p class="text-white/90">Contact support</p>
+      </a>
+      
+      <a href="/settings" class="bg-abbco-charcoal text-white rounded-lg p-6 hover:bg-abbco-charcoal/90 transition shadow-lg">
+        <h3 class="text-xl font-semibold mb-2">Settings</h3>
+        <p class="text-white/90">Manage your account</p>
+      </a>
+    </div>
+  </div>
+</AuthLayout>
